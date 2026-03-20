@@ -17,12 +17,12 @@ interface AuthState {
   authUser: AuthUser | null;
   isSigningUp: boolean;
   isLoggingIn: boolean;
-  isLoggingOut:boolean;
+  isLoggingOut: boolean;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
   setIsCheckingAuth: () => Promise<void>;
   signup: (data: unknown) => Promise<void>;
   login: (data: unknown) => Promise<void>;
-  logout :(data:unknown) =>Promise<void>
+  logout: (data: unknown) => Promise<void>;
 }
 
 export const checkAuthStore = create<AuthState>((set) => ({
@@ -32,7 +32,6 @@ export const checkAuthStore = create<AuthState>((set) => ({
   isSigningUp: false,
   isLoggingIn: false,
   isLoggingOut: false,
-  
 
   setIsAuthenticated: (isAuthenticated: boolean) =>
     set(() => ({ isAuthenticated })),
@@ -59,7 +58,9 @@ export const checkAuthStore = create<AuthState>((set) => ({
       console.log("Error in signup:", error);
       let errorMsg = "Signup failed. Please try again.";
       if (error instanceof Error) {
-        const axiosError = error as { response?: { data?: { error?: string } } };
+        const axiosError = error as {
+          response?: { data?: { error?: string } };
+        };
         if (axiosError.response?.data?.error) {
           errorMsg = axiosError.response.data.error;
         }
@@ -71,7 +72,7 @@ export const checkAuthStore = create<AuthState>((set) => ({
   },
 
   login: async (data: unknown) => {
-    set({ isLoggingIn: true});
+    set({ isLoggingIn: true });
     try {
       const res = await axiosInstance.post("/auth/login", data);
       set({ authUser: res.data, isAuthenticated: true });
@@ -80,7 +81,9 @@ export const checkAuthStore = create<AuthState>((set) => ({
       console.log("Error in login:", error);
       let errorMsg = "Login failed. Please try again.";
       if (error instanceof Error) {
-        const axiosError = error as { response?: { data?: { error?: string } } };
+        const axiosError = error as {
+          response?: { data?: { error?: string } };
+        };
         if (axiosError.response?.data?.error) {
           errorMsg = axiosError.response.data.error;
         }
@@ -91,15 +94,17 @@ export const checkAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  logout: async()=>{
-    try{
-      set({ isLoggingOut: true });
-      set({ authUser: null, isAuthenticated: false })
-      toast.success("You are logged out")
-
-    }catch(error){
+  logout: async () => {
+    set({ isLoggingOut: true });
+    try {
+      await axiosInstance.post("/auth/logout");
+      set({ authUser: null, isAuthenticated: false });
+      toast.success("You are logged out");
+    } catch (error) {
       console.log("Error in logout:", error);
       toast.error("Logout failed. Please try again.");
+    } finally {
+      set({ isLoggingOut: false });
     }
-  }
+  },
 }));

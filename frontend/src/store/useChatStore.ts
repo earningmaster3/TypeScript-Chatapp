@@ -5,10 +5,12 @@ import { toast } from "react-hot-toast";
 interface ChatStore {
   messages: any[];
   users: any[];
-  selectedUser: any;
+  selectedUser: { id: string | number } | null;
   isUserLoading: boolean;
   isMessageLoading: boolean;
   getUsers: () => Promise<void>;
+  setSelectedUser: (selectedUser: { id: string | number } | null) => void;
+  getMessages: (userId: string) => Promise<void>;
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -23,7 +25,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
     try {
       const res = await axiosInstance.get("/messages/users");
-      set({ users: res.data });
+      set({ users: res.data.users });
     } catch (error) {
       toast.error("Failed to fetch users");
     } finally {
@@ -43,7 +45,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     }
   },
 
-  setSelectedUser: (selectedUser: string) => {
+  setSelectedUser: (selectedUser: { id: string | number } | null) => {
     set({ selectedUser });
   },
 
@@ -52,7 +54,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set({ isMessageLoading: true });
     try {
       const res = await axiosInstance.post(
-        `/messages/send/${selectedUser.id}`,
+        `/messages/send/${selectedUser?.id}`,
         message,
       );
       set({ messages: [...messages, res.data] });
