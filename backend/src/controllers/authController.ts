@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../prisma/prisma";
-import { TestRequestBody } from "../types/types";
+import { TestRequestBody, LoginRequestBody } from "../types/types";
 import bcrypt from "bcrypt";
 import { generateToken } from "../lib/generateToken";
 import cloudinary from "../lib/cloudinary";
@@ -14,7 +14,7 @@ export const test = (req: Request, res: Response) => {
 export const signup = async (
   req: Request<{}, {}, TestRequestBody>,
   res: Response,
-):Promise<void> => {
+): Promise<void> => {
   try {
     const { fullName, email, password, profilePic } = req.body;
 
@@ -22,20 +22,25 @@ export const signup = async (
        res
         .status(400)
         .json({ error: "Please provide all required fields" });
+        return;
     }
 
     if (password.length < 6) {
        res
         .status(400)
         .json({ error: "Password must be at least 6 characters long" });
+        return;
     }
 
     const existingUser = await prisma.user.findFirst({
       where: { email: email },
     });
 
-    if (existingUser)
-       res.status(400).json({ error: "User already exists" });
+    if (existingUser){
+      res.status(400).json({ error: "User already exists" });
+      return;
+    }
+       
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -52,40 +57,47 @@ export const signup = async (
     res
       .status(201)
       .json({ message: "User created successfully", user: newUser, token });
+      return;
   } catch (error: unknown) {
     // const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    res.status(500).json({ error: "Something went wrong" });
+     res.status(500).json({ error: "Something went wrong" });
+     return;
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request<{}, {}, LoginRequestBody>, res: Response):Promise<void> => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password)
-      return res
+       {res
         .status(400)
         .json({ error: "Please provide all required fields" });
-
+        return;
+       }
+        
     const existingUser = await prisma.user.findFirst({ where: { email } });
 
-    if (!existingUser) return res.status(400).json({ error: "User not found" });
+    if (!existingUser) {res.status(400).json({ error: "User not found" }); return;}
 
     const isPasswordCorrect = await bcrypt.compare(
       password,
       existingUser.password,
     );
 
-    const token = generateToken(existingUser.id, res);
+    if (!isPasswordCorrect) {
+      res.status(400).json({ error: "Invalid credentials" });
+      return;
+    }
 
-    if (!isPasswordCorrect)
-      return res.status(400).json({ error: "Invalid credentials" });
+    const token = generateToken(existingUser.id, res);
 
     res
       .status(200)
       .json({ message: "Login successful", user: existingUser, token });
   } catch (error) {
-    return res.status(200).json({ message: "Login successful" });
+    res.status(500).json({ error: "Something went wrong" });
+     return;
   }
 };
 
