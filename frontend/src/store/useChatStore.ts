@@ -1,16 +1,24 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios";
 import { toast } from "react-hot-toast";
+interface User {
+  id: string;
+  fullName: string;
+  email: string;
+  profilePic?: string;
+}
 
 interface ChatStore {
   messages: any[];
-  users: any[];
-  selectedUser: { id: string | number } | null;
+  users: User[];
+  selectedUser: User | null; // Changed from { id: string | number } | null to User | null
   isUserLoading: boolean;
   isMessageLoading: boolean;
+  isSendingMessage: boolean;
   getUsers: () => Promise<void>;
-  setSelectedUser: (selectedUser: { id: string | number } | null) => void;
+  setSelectedUser: (selectedUser: User | null) => void;
   getMessages: (userId: string) => Promise<void>;
+  sendMessage: (message: any) => Promise<void>;
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -19,10 +27,10 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   selectedUser: null,
   isUserLoading: false,
   isMessageLoading: false,
+  isSendingMessage: false,
 
   getUsers: async () => {
     set({ isUserLoading: true });
-
     try {
       const res = await axiosInstance.get("/messages/users");
       set({ users: res.data.users });
@@ -37,7 +45,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set({ isMessageLoading: true });
     try {
       const res = await axiosInstance.get(`/messages/get/${userId}`);
-      set({ messages: res.data });
+      set({ messages: res.data.messages });
     } catch (error) {
       toast.error("Failed to fetch messages");
     } finally {
@@ -45,23 +53,23 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     }
   },
 
-  setSelectedUser: (selectedUser: { id: string | number } | null) => {
+  setSelectedUser: (selectedUser: User | null) => {
     set({ selectedUser });
   },
 
   sendMessage: async (message: any) => {
     const { selectedUser, messages } = get();
-    set({ isMessageLoading: true });
+    set({ isSendingMessage: true });
     try {
       const res = await axiosInstance.post(
-        `/messages/send/${selectedUser?.id}`,
+        `/messages/send/${selectedUser?.id || ""}`,
         message,
       );
-      set({ messages: [...messages, res.data] });
+      set({ messages: [...messages, res.data.newMessage] });
     } catch (error) {
       toast.error("Failed to send message");
     } finally {
-      set({ isMessageLoading: false });
+      set({ isSendingMessage: false });
     }
   },
 }));
