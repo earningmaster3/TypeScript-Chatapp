@@ -3,12 +3,10 @@ import axiosInstance from "../lib/axios";
 import toast from "react-hot-toast";
 
 interface AuthUser {
-  id: number;
-  profilePic: string;
+  id: string;
+  profilePic?: string;
   fullName: string;
   email: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 interface AuthState {
@@ -18,11 +16,12 @@ interface AuthState {
   isSigningUp: boolean;
   isLoggingIn: boolean;
   isLoggingOut: boolean;
+  onlineUsers: string[];
   setIsAuthenticated: (isAuthenticated: boolean) => void;
   setIsCheckingAuth: () => Promise<void>;
   signup: (data: unknown) => Promise<void>;
   login: (data: unknown) => Promise<void>;
-  logout: (data: unknown) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 export const checkAuthStore = create<AuthState>((set) => ({
@@ -32,6 +31,9 @@ export const checkAuthStore = create<AuthState>((set) => ({
   isSigningUp: false,
   isLoggingIn: false,
   isLoggingOut: false,
+  onlineUsers: [],
+  
+  
 
   setIsAuthenticated: (isAuthenticated: boolean) =>
     set(() => ({ isAuthenticated })),
