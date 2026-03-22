@@ -17,7 +17,10 @@ declare global {
 export const protectedRoute = async(req: Request, res: Response, next: NextFunction) => {
 
     const token = req.cookies.jwt;
-    if (!token) return res.status(401).json({ error: "Token not found" });
+    if (!token) {
+        console.log("protectedRoute - no jwt cookie found");
+        return res.status(401).json({ error: "Token not found" });
+    }
 
     const decode = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: string };
 

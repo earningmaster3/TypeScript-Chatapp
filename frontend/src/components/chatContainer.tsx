@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { checkAuthStore } from "../store/checkAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import ChatHeader from "./chatHeader";
@@ -7,18 +7,35 @@ import MessageSkeleton from "./skeletons/messageSkeleton";
 import { X } from "lucide-react";
 
 const chatContainer = () => {
-  const { getMessages, selectedUser, messages, isMessageLoading } =
+  const { getMessages, selectedUser, messages, isMessageLoading, subscribeToMessages,unSubscribeToMessages } =
     useChatStore();
 
   const { authUser } = checkAuthStore();
 
   const [modalImage, setModalImage] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (selectedUser) {
       getMessages(selectedUser.id || "");
     }
+
   }, [selectedUser, getMessages, selectedUser?.id || ""]);
+
+  useEffect(() => {
+    if (selectedUser) {
+      subscribeToMessages(selectedUser.id || "");
+    }
+
+    return () => {
+      unSubscribeToMessages();
+    };
+  }, [selectedUser, subscribeToMessages, unSubscribeToMessages, selectedUser?.id || ""]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   if (isMessageLoading) {
     return (
@@ -83,6 +100,7 @@ const chatContainer = () => {
             </div>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
       <MessageInput />
 
