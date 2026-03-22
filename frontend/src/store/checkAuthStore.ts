@@ -43,7 +43,7 @@ export const checkAuthStore = create<AuthState>((set, get) => ({
 
   setIsCheckingAuth: async () => {
     try {
-      const res = await axiosInstance.get("/auth/checkAuth");
+      const res = await axiosInstance.get("/auth/checkAuth", { timeout: 5000 });
       set({ authUser: res.data, isAuthenticated: true });
       get().connectSocket();
     } catch (error) {

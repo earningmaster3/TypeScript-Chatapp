@@ -17,7 +17,7 @@ const App = () => {
     setIsCheckingAuth();
   },[setIsCheckingAuth])
 
-  console.log(isAuthenticated, authUser, onlineUsers)
+  console.log(isAuthenticated, authUser)
   console.log("Online Users:", onlineUsers)
 
   if (isCheckingAuth) {

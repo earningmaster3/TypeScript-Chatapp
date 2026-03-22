@@ -54,10 +54,13 @@ export const signup = async (
     });
 
     const token = generateToken(newUser.id, res);
-    res
-      .status(201)
-      .json({ message: "User created successfully", user: newUser, token });
-      return;
+    res.status(201).json({
+      id: newUser.id,
+      fullName: newUser.fullName,
+      email: newUser.email,
+      profilePic: newUser.profilePic,
+    });
+    return;
   } catch (error: unknown) {
     // const errorMessage = error instanceof Error ? error.message : "Unknown error";
      res.status(500).json({ error: "Something went wrong" });
@@ -92,9 +95,12 @@ export const login = async (req: Request<{}, {}, LoginRequestBody>, res: Respons
 
     const token = generateToken(existingUser.id, res);
 
-    res
-      .status(200)
-      .json({ message: "Login successful", user: existingUser, token });
+    res.status(200).json({
+      id: existingUser.id,
+      fullName: existingUser.fullName,
+      email: existingUser.email,
+      profilePic: existingUser.profilePic,
+    });
   } catch (error) {
     res.status(500).json({ error: "Something went wrong" });
      return;
@@ -163,7 +169,7 @@ export const updateProfile = async (req: Request, res: Response) => {
 export const checkAuth = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    console.log("checkAuth - req.user?.id:", userId);
+    
 
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized - no userId" });
