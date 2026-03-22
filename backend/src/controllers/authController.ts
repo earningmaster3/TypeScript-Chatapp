@@ -163,6 +163,11 @@ export const updateProfile = async (req: Request, res: Response) => {
 export const checkAuth = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
+    console.log("checkAuth - req.user?.id:", userId);
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized - no userId" });
+    }
 
     const user = await prisma.user.findFirst({
       where: { id: userId },
@@ -173,8 +178,10 @@ export const checkAuth = async (req: Request, res: Response) => {
         profilePic: true,
       },
     });
+
+    console.log("checkAuth - found user:", user);
+
     return res.status(200).json({
-      message: "user authenticated successfully",
       id: userId,
       fullName: user?.fullName,
       email: user?.email,

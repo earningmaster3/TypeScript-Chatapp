@@ -1,15 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { checkAuthStore } from "../store/checkAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import ChatHeader from "./chatHeader";
 import MessageInput from "../components/messageInput";
 import MessageSkeleton from "./skeletons/messageSkeleton";
+import { X } from "lucide-react";
 
 const chatContainer = () => {
   const { getMessages, selectedUser, messages, isMessageLoading } =
     useChatStore();
 
   const { authUser } = checkAuthStore();
+
+  const [modalImage, setModalImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (selectedUser) {
@@ -33,7 +36,7 @@ const chatContainer = () => {
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`chat ${message.senderId === authUser?.id ? "chat-end" : "chat-start"}`}
+            className={`chat ${message.senderId === authUser?.id ? "chat-end" : "chat-end"}`}
           >
             <div className="chat-image avatar">
               <div className="w-12 h-12">
@@ -67,11 +70,42 @@ const chatContainer = () => {
                 })}
               </p>
             </div>
-            <div className="chat-bubble">{message.text}</div>
+            <div className="chat-bubble">
+              {message.image && (
+                <img
+                  src={message.image}
+                  alt="Shared attachment"
+                  className="mb-2 max-w-xs rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => setModalImage(message.image)}
+                />
+              )}
+              {message.text && <p>{message.text}</p>}
+            </div>
           </div>
         ))}
       </div>
       <MessageInput />
+
+      {/* Image Modal */}
+      {modalImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setModalImage(null)}
+        >
+          <button
+            className="absolute top-4 right-4 text-white hover:text-gray-300"
+            onClick={() => setModalImage(null)}
+          >
+            <X className="size-8" />
+          </button>
+          <img
+            src={modalImage}
+            alt="Full size"
+            className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 };
