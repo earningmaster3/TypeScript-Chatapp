@@ -14,8 +14,11 @@ const App = () => {
   const {isAuthenticated, authUser,setIsCheckingAuth, isCheckingAuth, onlineUsers} = checkAuthStore();
 
   useEffect(()=>{
-    setIsCheckingAuth();
-  },[setIsCheckingAuth])
+    // Only check auth if not already authenticated
+    if (!isAuthenticated && !authUser) {
+      setIsCheckingAuth();
+    }
+  },[setIsCheckingAuth, isAuthenticated, authUser])
 
   console.log(isAuthenticated, authUser)
   console.log("Online Users:", onlineUsers)

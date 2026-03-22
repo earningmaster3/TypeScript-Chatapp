@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import cloudinary from "../lib/cloudinary";
 import { prisma } from "../prisma/prisma";
 import { TestRequestMsg } from "../types/types";
+import { io, getReceiverSocketId } from "../lib/socket";
+
 
 export const sendMessages = async (
   req: Request<{ id: string }, {}, TestRequestMsg>,
@@ -32,6 +34,12 @@ export const sendMessages = async (
         image: imageUrl ?? null,
       },
     });
+
+    const receiverSocketId = getReceiverSocketId(receiverId);
+
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
 
     res.status(201).json({
       message: "Message has been created",

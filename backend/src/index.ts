@@ -17,7 +17,7 @@ app.use(cookieParser());
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
 app.get("", (req, res) => {
-  res.send("You are in home route");
+  res.send("You are in home route");  
 });
 
 app.use("/api/auth", authRoute);
