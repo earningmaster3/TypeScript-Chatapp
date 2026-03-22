@@ -36,10 +36,11 @@ const sidebar = () => {
           </div>
         ) : (
           users.map((user) => (
-            <div
+            <button
+              type="button"
               key={user.id}
               onClick={() => setSelectedUser(user)}
-              className={`px-4 py-3 cursor-pointer hover:bg-base-200 transition-colors flex items-center gap-3 ${
+              className={`w-full px-4 py-3 text-left cursor-pointer hover:bg-base-200 transition-colors flex items-center gap-3 ${
                 selectedUser?.id === user.id
                   ? "bg-primary/10 border-l-4 border-primary"
                   : "border-l-4 border-transparent"
@@ -57,21 +58,26 @@ const sidebar = () => {
                 </div>
                 <span
                   className={`absolute top-0 right-0 size-3 rounded-full border-2 border-base-100 ${
-                    onlineUsers.includes(user.id) ? "bg-green-500" : "bg-gray-400"
+                    onlineUsers.includes(user.id)
+                      ? "bg-green-500"
+                      : "bg-gray-400"
                   }`}
                 />
               </div>
-
               {/* User info */}
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm truncate">{user.fullName}</p>
-                <p className={`text-xs ${
-                  onlineUsers.includes(user.id) ? "text-green-500" : "text-base-content/40"
-                }`}>
+                <p
+                  className={`text-xs ${
+                    onlineUsers.includes(user.id)
+                      ? "text-green-500"
+                      : "text-base-content/40"
+                  }`}
+                >
                   {onlineUsers.includes(user.id) ? "Online" : "Offline"}
                 </p>
               </div>
-            </div>
+            </button>
           ))
         )}
       </div>

@@ -11,13 +11,14 @@ import { Toaster } from "react-hot-toast";
 
 const App = () => {
 
-  const {isAuthenticated, authUser,setIsCheckingAuth, isCheckingAuth} = checkAuthStore();
+  const {isAuthenticated, authUser,setIsCheckingAuth, isCheckingAuth, onlineUsers} = checkAuthStore();
 
   useEffect(()=>{
     setIsCheckingAuth();
   },[setIsCheckingAuth])
 
-  console.log(isAuthenticated, authUser)
+  console.log(isAuthenticated, authUser, onlineUsers)
+  console.log("Online Users:", onlineUsers)
 
   if (isCheckingAuth) {
     return <div>Loading...</div>;
